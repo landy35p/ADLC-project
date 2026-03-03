@@ -4,43 +4,15 @@
 
 ## 1. 代理人關係圖 (Orchestration Map)
 
-這張圖將 Agent 依據開發階段分群，並標示出**核心路徑**與**回饋循環**。
+這張圖展示了 Agent 在開發生命週期中的縱向流轉、核心交付物以及回饋機制。
 
-```mermaid
-graph LR
-    subgraph Planning [需求與設計]
-        PM[Product Agent] --> Arch[Architect Agent]
-    end
+![ADLC Orchestration Map](./images/orchestration.svg)
 
-    subgraph Dev [開發實作]
-        Arch -- "規格" --> DevA[Dev Agent]
-    end
-
-    subgraph Verify [驗證防線]
-        DevA -- "代碼" --> Sec[Security Agent]
-        Sec -- "安全" --> QA[QA Agent]
-    end
-
-    subgraph Ops [運行交付]
-        QA -- "品質" --> OPS[DevOps Agent]
-        OPS -- "部署" --> SRE[SRE Agent]
-    end
-
-    %% 回饋循環 (Inner Loops)
-    Sec -. "漏洞修正" .-> DevA
-    QA -. "Bug 修正" .-> DevA
-
-    %% 長期閉環 (Outer Loops)
-    SRE -. "生產異常回饋" .-> DevA
-    SRE -. "需求變更/優化" .-> PM
-    User((User Vision)) ==> PM
-
-    %% 樣式設定
-    classDef main fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef loop stroke:#f44336,stroke-dasharray: 5 5;
-    class PM,Arch,DevA,Sec,QA,OPS,SRE main;
-    class Sec,QA,SRE loop;
-```
+> [!TIP]
+> **如何閱讀此圖**：
+> - **實線箭頭**：核心交付流程（從需求到部署）。
+> - **紅色虛線**：內部快速回饋循環（發生 Bug 或安全漏洞時自動退回）。
+> - **藍色虛線**：外部長期閉環（根據生產環境數據優化或需求變更回饋到產品端）。
 
 ---
 
