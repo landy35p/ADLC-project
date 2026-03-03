@@ -27,3 +27,6 @@
 ## Instructions for Agents
 1. 在執行 `git commit` 之前，必須將變更重點結合成簡短有力的中文語句。
 2. 確保 `type` 選用正確，反映變更的本質。
+3. **強制確認規則 (Critical)**：
+   - **Commit 前**：Agent 應在回覆中摘要變更內容。
+   - **Push 前**：Agent **絕對禁止** 自動執行 `git push`。必須在 `notify_user` 中明確詢問「是否批准上傳至遠端倉庫？」，得到確認後方可執行。
