@@ -1,47 +1,106 @@
 # 系統架構設計 - 萬能活動整理系統 (Activity Aggregator)
 
-## 0. 視覺化架構概覽 (Visual Overview)
+本文件定義系統的架構基礎、層次結構與領域映射關係，確保從業務需求到代碼實作具備完整的可追蹤性。
 
-![System Architecture](./images/architecture.svg)
+## 1. 系統願景與概覽 (System Context)
 
-> [!NOTE]
-> 以上架構圖採用向量格式 (SVG) 產出，確保文字精準且原生支援 VS Code 預覽與 GitHub 顯示。
+### 1.1 核心價值
+整合多個分散的活動平台（如 Klook, KKday, 政府 Open Data），透過「去重邏輯」與「個人化偏好匹配」，提供使用者最精準的活動建議。
 
-## 1. 領域驅動設計 (DDD) 模型
+### 1.2 高階架構圖
+```mermaid
+graph TD
+    User((使用者)) ==> UI[Web/CLI 展現層]
+    
+    subgraph Core [系統核心大腦]
+        UI -- "1. 提供偏好" --> App[應用服務層]
+        App -- "2. 觸發彙整" --> Agg[彙整服務]
+        Agg -- "3. 資料清理" --> Domain[領域模型]
+    end
+    
+    subgraph Infra [基礎設施與外部]
+        Agg -- "4. 抓取" --> Crawlers[平台爬蟲/API 介面]
+        Crawlers -- "5. 來源" --> Ext[外部平台]
+        Domain -- "6. 持久化" --> DB[(SQLite)]
+    end
 
-### 核心實體與聚合根 (Entities & Aggregate Roots)
-*   **User (使用者)** [Aggregate Root]: 系統使用者資訊。
-*   **Preference (偏好設定)** [Value Object]: 使用者的篩選權重（標籤、預算、區域）。
-*   **Activity (活動)** [Entity]: 跨平台統整後的標準化活動物件。使用 `sourcePlatform` + `externalId` 作為動態去重識別。
+    classDef highContrast fill:#bbdefb,stroke:#0d47a1,stroke-width:2px,color:#000;
+    class UI,Core,Agg,Domain,DB highContrast;
+```
 
-## 2. 系統架構分層 (System Layering)
-如上圖所示，系統分為四個核心層次：
-1.  **UI 展現層**：負責使用者互動與偏好設定輸入。
-2.  **應用服務層 (核心大腦)**：協調「資料彙整」與「偏好匹配」。
-3.  **彙整/基礎設施層**：對接多個外部平台 (Klook, Open Data)，進行資料清理與標準化。
-4.  **持久化層**：使用 SQLite 儲存已抓取的活動與用戶偏好，提升系統反應速度。
+---
 
-## 3. 資料處理流程 (Data Flow)
+## 2. 領域深潛 (Domain Deep Dive)
+
+本系統的核心邏輯在於代碼中的「領域實體」。
+
+### 2.1 實體與聚合根 (Entities)
+| 實體名稱 | 職責 | 關鍵屬性 |
+| :--- | :--- | :--- |
+| **Activity** | 最小活動單元 | `sourcePlatform`, `externalId`, `tags`, `price` |
+| **User** | 偏好儲存者 | `userId`, `preferences` |
+
+### 2.2 去重邏輯 (Deduplication)
+為防止同一活動在 Klook 與 KKday 同時出現時重複顯示，系統採用以下策略：
+*   **標識生成**：`SHA256(normalize(Title) + Date + Location)`。
+*   **衝突解決**：若標識相同，優先保留資訊更新鮮或詳細度更高的版本。
+
+---
+
+## 3. 模組實作與分層 (Module Realization)
+
+採用 **Ports and Adapters (Hexagonal Architecture)** 架構。
+
+```mermaid
+classDiagram
+    class ActivityService {
+        +getRecommendations(preferences)
+    }
+    class ActivityRepository {
+        <<interface>>
+        +save(Activity)
+        +findByCriteria(criteria)
+    }
+    class PlatformAdapter {
+        <<interface>>
+        +fetchRawData()
+        +transformToEntity()
+    }
+    
+    ActivityService ..> ActivityRepository : 使用
+    ActivityService ..> PlatformAdapter : 觸發彙整
+    PlatformAdapter ..> ActivityRepository : 儲存結果
+```
+
+---
+
+## 4. 追蹤矩陣 (Traceability Matrix)
+
+明確標註業務需求如何落地至技術細節。
+
+| 業務需求 | 領域邏輯 (Domain) | 技術實現 (Infra/DB) |
+| :--- | :--- | :--- |
+| **跨平台去重** | `Activity.generateUniqueId()` | `DB.Activities.uniqueIndex` |
+| **個人化推薦** | `Preference.calculateWeight()` | `Prisma.findMany({orderBy...})` |
+| **即時同步** | `AggregationService.sync()` | `Axios` + `Cheerio` (Crawlers) |
+
+---
+
+## 5. 核心流程序列 (Key Flow)
+
+描述「活動推薦」的動態協作。
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant A as App Service
-    participant S as Aggregation Service
-    participant E as External Platforms
-    
-    U->>A: 請求活動推薦
-    A->>A: 讀取使用者偏好 (Preference)
-    A->>S: 觸發同步/快取查詢
-    S->>E: 呼叫外部 API
-    E-->>S: 回傳原始資料 (Raw Data)
-    S->>S: 去重與轉換為 Activity Entity
-    S-->>A: 回傳 Activity 清單
-    A->>A: 依據 Preference 進行標籤權重排序
-    A-->>U: 回傳推薦活動
+    autonumber
+    User->>AppService: 搜尋活動
+    AppService->>Preference: 讀取權重 (Weighting)
+    AppService->>Aggregator: 啟動跨平台抓取 (若快取過期)
+    Aggregator->>Adapter: 請求原始資料
+    Adapter-->>Aggregator: Raw JSON / HTML
+    Aggregator->>Activity: 封裝為 Entity (去重)
+    Activity-->>DB: 存檔 (SQLite)
+    AppService->>DB: 讀取與排序
+    DB-->>AppService: 推薦清單
+    AppService-->>User: 顯示結果
 ```
-
-## 4. 技術選型建議
-*   **Language**: TypeScript (強型別確保資料模型一致)。
-*   **Persistence**: Prisma ORM + SQLite (輕量開發)。
-*   **Crawling/Fetching**: `axios` + `cheerio` (用於無 API 的平台)。
