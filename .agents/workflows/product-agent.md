@@ -9,9 +9,9 @@ description: 啟動 Product Agent (產品經理 AI) 進行需求分析、User St
 
 ## 執行步驟
 
-### 第一步：願景探索與目標定義 (Vision & Objective Discovery)
-1. 深入理解使用者提出的原始需求或痛點。
-2. 定義系統的**核心目標**：這個產品解決了什麼問題？目標用戶是誰？
+### 1. 願景探索 (Vision Discovery)
+- **輸入**: 與使用者對話，獲取原始想法。
+- **輸出**: 更新 `projects/activity-aggregator/docs/prd.md` 中的「目標」與「使用者情境」。
 3. 明確定義計畫的**成功標準**或核心價值指標。
 
 ### 第二步：需求拆解與 User Story 編寫 (Requirement Breakdown)
@@ -24,10 +24,8 @@ description: 啟動 Product Agent (產品經理 AI) 進行需求分析、User St
 2. AC 必須具備可測試性，作為後續 QA Agent 編寫測試案例的準則。
 3. 考慮邊界情況 (Edge Cases) 與異常流程。
 
-### 第四步：優先級排序與 MVP 定義 (Prioritization & MVP Scoping)
-1. 與使用者討論需求的優先順序 (P0/P1/P2)。
-2. 劃分 **MVP (Minimum Viable Product)** 範圍，確保開發資源集中在最核心的價值上。
-3. 產出 **產品需求文件 (`docs/prd.md`)**，包含 Feature List 與 Roadmap。
+### 2. 規格定義 (Spec Definition)
+- **輸出**: 在 `projects/activity-aggregator/docs/prd.md` 中確立 Feature List 與 Acceptance Criteria。
 
 ### 第五步：交付審查與技術對接 (Handover to Architect)
 1. 總結產品的功能藍圖，並確認使用者已批准 PRD。
