@@ -36,12 +36,12 @@ graph TD
     SRE -. "生產環境反饋" .-> Dev
     SRE -. "需求演進/變更" .-> PM
 
-    %% 樣式美化
-    classDef primary fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
-    classDef secondary fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
-    classDef success fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
-    classDef warning fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
-    classDef danger fill:#ffebee,stroke:#c62828,stroke-width:2px;
+    %% 樣式美化 (High Contrast for Light/Dark Modes)
+    classDef primary fill:#bbdefb,stroke:#0d47a1,stroke-width:2px,color:#000;
+    classDef secondary fill:#e1bee7,stroke:#4a148c,stroke-width:2px,color:#000;
+    classDef success fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px,color:#000;
+    classDef warning fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000;
+    classDef danger fill:#ffccbc,stroke:#bf360c,stroke-width:2px,color:#000;
 
     class PM primary;
     class Arch secondary;

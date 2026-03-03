@@ -14,6 +14,9 @@
 ## Mermaid Best Practices
 - **Layout**: 優先使用 `graph TD` (由上而下) 以利在文件與行動端閱讀。
 - **Styling**: 明確定義 `classDef` 來區分不同的系統層次（如：UI, Core, Infrastructure）。
+- **Accessibility & Contrast**: 
+    - **文字顏色**：必須在 `classDef` 中明確指定 `color` (例如 `color:#000`)，以防文字在深色/淺色主題切換時與背景混色。
+    - **背景飽和度**：使用飽和度稍高的背景色，並搭配深色邊框 (`stroke`) 與加粗邊框 (`stroke-width:2px`) 以提升辨識度。
 - **Meaningful Labels**: 節點名稱應包含功能描述 (e.g., `Agg[Aggregator Service]`)。
 
 ## SVG (Fallback/Advanced)
