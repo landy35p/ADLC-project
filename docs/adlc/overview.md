@@ -6,88 +6,49 @@
 
 這張圖展示了 Agent 在開發生命週期中的縱向流轉、核心交付物以及回饋機制。
 
-<svg width="600" height="900" viewBox="0 0 600 900" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .box { stroke-width: 2; rx: 10; ry: 10; }
-    .text-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; font-weight: bold; text-anchor: middle; fill: #333; }
-    .text-desc { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; text-anchor: middle; fill: #666; }
-    .arrow { stroke: #455a64; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
-    .loop-red { stroke: #ef5350; stroke-width: 2; fill: none; stroke-dasharray: 6,4; marker-end: url(#arrowhead-red); }
-    .loop-blue { stroke: #42a5f5; stroke-width: 2; fill: none; stroke-dasharray: 6,4; marker-end: url(#arrowhead-blue); }
-    .group-bg { fill: #fafafa; stroke: #cfd8dc; stroke-width: 1; stroke-dasharray: 4,4; rx: 15; ry: 15; }
-  </style>
+```mermaid
+graph TD
+    User((User Vision)) ==> PM
 
-  <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#455a64" />
-    </marker>
-    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#ef5350" />
-    </marker>
-    <marker id="arrowhead-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#42a5f5" />
-    </marker>
-  </defs>
+    subgraph Planning [需求與設計階段]
+        PM[Product Agent] --> Arch[Architect Agent]
+    end
 
-  <!-- Start -->
-  <circle cx="300" cy="40" r="10" fill="#37474f" />
-  <text x="300" y="25" class="text-desc" font-weight="bold">User Vision</text>
-  <line x1="300" y1="50" x2="300" y2="80" class="arrow" />
+    subgraph Development [開發實作階段]
+        Arch -- "核心規格" --> Dev[Dev Agent]
+    end
 
-  <!-- Phase 1: Product -->
-  <rect x="200" y="80" width="200" height="70" class="box" fill="#e3f2fd" stroke="#1976d2" />
-  <text x="300" y="115" class="text-title">Product Agent</text>
-  <text x="300" y="135" class="text-desc">PRD & AC Definition</text>
-  <line x1="300" y1="150" x2="300" y2="180" class="arrow" />
+    subgraph Validation [品質與安全防線]
+        Dev -- "程式碼提交" --> Sec[Security Agent]
+        Sec -- "安全審核" --> QA[QA Agent]
+    end
 
-  <!-- Phase 2: Architect -->
-  <rect x="200" y="180" width="200" height="70" class="box" fill="#f3e5f5" stroke="#7b1fa2" />
-  <text x="300" y="215" class="text-title">Architect Agent</text>
-  <text x="300" y="235" class="text-desc">System Design & Specs</text>
-  <line x1="300" y1="250" x2="300" y2="280" class="arrow" />
+    subgraph Delivery [部署與穩定性]
+        QA -- "品質驗收" --> DevOps[DevOps Agent]
+        DevOps -- "自動化部署" --> SRE[SRE Agent]
+    end
 
-  <!-- Phase 3: Dev -->
-  <rect x="200" y="280" width="200" height="70" class="box" fill="#e8f5e9" stroke="#2e7d32" />
-  <text x="300" y="315" class="text-title">Dev Agent</text>
-  <text x="300" y="335" class="text-desc">Coding & Verification</text>
-  <line x1="300" y1="350" x2="300" y2="400" class="arrow" />
+    %% 內部快速回饋循環 (Inner Loops)
+    Sec -. "發現漏洞" .-> Dev
+    QA -. "發現 Bug" .-> Dev
 
-  <!-- Feedback Group: QA & Security -->
-  <rect x="50" y="400" width="500" height="150" class="group-bg" />
-  <text x="100" y="420" class="text-desc" font-weight="bold">Validation Shield</text>
+    %% 外部長期閉環 (Outer Loops)
+    SRE -. "生產環境反饋" .-> Dev
+    SRE -. "需求演進/變更" .-> PM
 
-  <rect x="100" y="440" width="180" height="70" class="box" fill="#fff9c4" stroke="#fbc02d" />
-  <text x="190" y="475" class="text-title">Security Agent</text>
-  <text x="190" y="495" class="text-desc">Security Audit</text>
+    %% 樣式美化
+    classDef primary fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef secondary fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    classDef success fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef warning fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
+    classDef danger fill:#ffebee,stroke:#c62828,stroke-width:2px;
 
-  <rect x="320" y="440" width="180" height="70" class="box" fill="#fff3e0" stroke="#f57c00" />
-  <text x="410" y="475" class="text-title">QA Agent</text>
-  <text x="410" y="495" class="text-desc">Integration Testing</text>
-
-  <!-- Inner Loop Arrows -->
-  <path d="M 100,475 Q 20,475 20,315 T 190,315" class="loop-red" />
-  <text x="60" y="380" class="text-desc" fill="#ef5350">Bug / Vulnerability Fix</text>
-
-  <line x1="300" y1="550" x2="300" y2="600" class="arrow" />
-
-  <!-- Phase 5: DevOps -->
-  <rect x="200" y="600" width="200" height="70" class="box" fill="#fafafa" stroke="#455a64" />
-  <text x="300" y="635" class="text-title">DevOps Agent</text>
-  <text x="300" y="655" class="text-desc">Build & Deploy</text>
-  <line x1="300" y1="670" x2="300" y2="700" class="arrow" />
-
-  <!-- Phase 6: SRE -->
-  <rect x="200" y="700" width="200" height="70" class="box" fill="#ffebee" stroke="#c62828" />
-  <text x="300" y="735" class="text-title">SRE Agent</text>
-  <text x="300" y="755" class="text-desc">Monitoring & Stability</text>
-
-  <!-- Outer Loop: Requirement Change -->
-  <path d="M 400,735 Q 580,735 580,115 T 410,115" class="loop-blue" />
-  <text x="500" y="420" class="text-desc" fill="#42a5f5">Feedback / Change</text>
-
-  <!-- Footnote -->
-  <text x="300" y="850" class="text-desc" fill="#999">© ADLC Orchestration Map - Vertical Visualization</text>
-</svg>
+    class PM primary;
+    class Arch secondary;
+    class Dev success;
+    class Sec,QA warning;
+    class DevOps,SRE danger;
+```
 
 > [!TIP]
 > **如何閱讀此圖**：
