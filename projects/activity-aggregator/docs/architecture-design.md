@@ -49,27 +49,87 @@ graph TD
 
 ## 3. 模組實作與分層 (Module Realization)
 
-採用 **Ports and Adapters (Hexagonal Architecture)** 架構。
+本系統採用 **Onion Architecture (洋蔥架構)**，結合 **DDD 領域驅動設計**，強調「依賴永遠指向核心」的原則。這種結構能確保核心業務邏輯（Domain）不受外部技術變動（如資料庫遷移或 UI 框架更換）的影響。
+
+### 3.1 四層架構定義
+
+| 層級 (Layer) | 職責 (Responsibilities) | 內容物 (Examples) | 依賴關係 |
+| :--- | :--- | :--- | :--- |
+| **Domain** | 核心業務規則、狀態變更 | `Activity` (Entity), `DeduplicationService` | 無 |
+| **Application** | 協調用例 (Use Cases)、流程控制 | `SyncActivitiesUseCase`, `RecommendationService` | → Domain |
+| **Infrastructure** | 技術細節實現（Persistence, API） | `SqliteActivityRepository`, `KlookAdapter` | → Domain, Application |
+| **Interface** | 使用者入口（CLI, REST API, UI） | `ActivityController`, `SearchCLI` | → Application |
+
+```mermaid
+graph LR
+    subgraph External [最外層: Infrastructure & Interface]
+        Infra[Infrastructure: DB, API Clients]
+        UI[Interface: Web UI, CLI]
+    end
+    
+    subgraph Internal [內部核心]
+        App[Application: Use Cases / Ports]
+        Domain[Domain: Entities / Services]
+    end
+
+    UI --> App
+    Infra --> App
+    App --> Domain
+```
+
+> [!NOTE]
+> 在洋蔥架構中，**Infrastructure** 與 **Interface** 同屬最外層。
+> *   **Interface** 調用 Application 層的用例。
+> *   **Infrastructure** 實作 Application/Domain 定義的抽象介面（如 Repository）。
+> *   這確保了當資料庫或 UI 框架改變時，核心業務邏輯（Domain）完全不受影響。
+
+
+### 3.2 目錄結構規範
+
+為確保 ADLC 中的 **Dev Agent** 能精準定位代碼，專案採用以下目錄結構：
+
+```text
+src/
+├── domain/                    # 領域層：純業務邏輯
+│   ├── entities/              # 活動、使用者實體
+│   ├── services/              # 跨實體的邏輯 (例：去重判斷)
+│   └── repositories/          # [介面] 定義資料存取合約
+├── application/               # 應用層：協調調度
+│   ├── use-cases/             # 具體場景 (例：同步外部活動)
+│   └── dtos/                  # 資料傳輸對象
+├── infrastructure/            # 基礎設施層：硬體與第三方實現
+│   ├── persistence/           # SQLite / Prisma 實作
+│   ├── adapters/              # 爬蟲與外部 API 實作
+│   └── config/                # 環境變數與配置
+└── interface/                 # 接口層：與外界通訊
+    ├── http/                  # Express/Next.js 路由
+    └── cli/                   # 命令列工具介面
+```
+
+### 3.3 依賴倒置 (Dependency Inversion)
+
+在洋蔥架構中，位於**最外層 (External)** 的 `Infrastructure` 不會被內層依賴，而是反過來依賴內層定義的抽象介面。
+*   **範例**：`SyncActivitiesUseCase` (Application 層) 依賴於 `IActivityRepository` (Domain 層)，而位於最外層的 `SqliteActivityRepository` (Infrastructure 層) 則負責實作該介面。
+*   **效益**：這確保了核心業務與外部技術實現（如資料庫）徹底解耦。
 
 ```mermaid
 classDiagram
-    class ActivityService {
-        +getRecommendations(preferences)
-    }
-    class ActivityRepository {
+    class IActivityRepository {
         <<interface>>
         +save(Activity)
         +findByCriteria(criteria)
     }
-    class PlatformAdapter {
-        <<interface>>
-        +fetchRawData()
-        +transformToEntity()
+    class SqliteActivityRepository {
+        +save(Activity)
+        +findByCriteria(criteria)
+    }
+    class SyncActivitiesUseCase {
+        -IActivityRepository repo
+        +execute()
     }
     
-    ActivityService ..> ActivityRepository : 使用
-    ActivityService ..> PlatformAdapter : 觸發彙整
-    PlatformAdapter ..> ActivityRepository : 儲存結果
+    SyncActivitiesUseCase --> IActivityRepository : 依賴介面 (DIP)
+    SqliteActivityRepository ..|> IActivityRepository : 實作介面
 ```
 
 ---
@@ -88,19 +148,24 @@ classDiagram
 
 ## 5. 核心流程序列 (Key Flow)
 
-描述「活動推薦」的動態協作。
+描述「活動推薦」的動態協作，展現各層級如何透過 DIP 進行互動。
 
 ```mermaid
 sequenceDiagram
     autonumber
-    User->>AppService: 搜尋活動
-    AppService->>Preference: 讀取權重 (Weighting)
-    AppService->>Aggregator: 啟動跨平台抓取 (若快取過期)
-    Aggregator->>Adapter: 請求原始資料
-    Adapter-->>Aggregator: Raw JSON / HTML
-    Aggregator->>Activity: 封裝為 Entity (去重)
-    Activity-->>DB: 存檔 (SQLite)
-    AppService->>DB: 讀取與排序
-    DB-->>AppService: 推薦清單
-    AppService-->>User: 顯示結果
+    User->>Interface: 搜尋活動 (Search Request)
+    Interface->>UseCase: getRecommendations(preferences)
+    UseCase->>Repository: findByCriteria(preferences)
+    Repository-->>UseCase: Cached Activities
+    
+    alt 資料過期或不足
+        UseCase->>Adapter: fetchRawData()
+        Adapter-->>UseCase: Raw Data
+        UseCase->>DomainService: deduplicate(activities)
+        DomainService-->>UseCase: Cleaned Entities
+        UseCase->>Repository: save(entities)
+    end
+    
+    UseCase-->>Interface: Sorted Activity List
+    Interface-->>User: 顯示推薦結果
 ```
