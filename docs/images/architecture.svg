@@ -1,0 +1,62 @@
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Styles -->
+  <style>
+    .box { stroke-width: 2; rx: 8; ry: 8; }
+    .text-main { font-family: 'Segoe UI', Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; fill: #333; }
+    .text-tag { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; text-anchor: middle; fill: #666; }
+    .arrow { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+    .loop { stroke: #f44336; stroke-width: 2; fill: none; stroke-dasharray: 4,4; marker-end: url(#arrowhead-red); }
+  </style>
+
+  <!-- Markers -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+    <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f44336" />
+    </marker>
+  </defs>
+
+  <!-- Background Layer Groups -->
+  <rect x="50" y="200" width="700" height="150" fill="#f1f8e9" stroke="#c5e1a5" stroke-width="1" rx="10" />
+  <text x="70" y="220" font-family="sans-serif" font-size="12" fill="#558b2f" font-weight="bold">核心邏輯層 (Application Core)</text>
+
+  <!-- Nodes -->
+  <!-- UI Layer -->
+  <rect x="325" y="40" width="150" height="50" class="box" fill="#e3f2fd" stroke="#1976d2" />
+  <text x="400" y="70" class="text-main">User Interface</text>
+  <text x="400" y="85" class="text-tag">[Web / Mobile]</text>
+
+  <!-- API Gateway -->
+  <rect x="325" y="120" width="150" height="50" class="box" fill="#ffffff" stroke="#333" />
+  <text x="400" y="150" class="text-main">API Gateway</text>
+
+  <!-- App Service -->
+  <rect x="325" y="230" width="150" height="60" class="box" fill="#ffffff" stroke="#2e7d32" />
+  <text x="400" y="260" class="text-main">App Service</text>
+  <text x="400" y="280" class="text-tag">(Orchestrator)</text>
+
+  <!-- Aggregator -->
+  <rect x="550" y="235" width="160" height="50" class="box" fill="#f5f5f5" stroke="#616161" />
+  <text x="630" y="265" class="text-main">Aggregator Service</text>
+
+  <!-- External Platforms -->
+  <rect x="550" y="380" width="160" height="50" class="box" fill="#fff3e0" stroke="#e65100" />
+  <text x="630" y="410" class="text-main">External Platforms</text>
+  <text x="630" y="425" class="text-tag">[Klook, OpenData]</text>
+
+  <!-- Data Store -->
+  <rect x="100" y="235" width="150" height="50" class="box" fill="#fff3e0" stroke="#e65100" />
+  <text x="175" y="265" class="text-main">Database (SQLite)</text>
+
+  <!-- Arrows -->
+  <line x1="400" y1="90" x2="400" y2="120" class="arrow" />
+  <line x1="400" y1="170" x2="400" y2="230" class="arrow" />
+  <line x1="475" y1="260" x2="550" y2="260" class="arrow" />
+  <line x1="325" y1="260" x2="250" y2="260" class="arrow" />
+  <line x1="630" y1="285" x2="630" y2="380" class="arrow" />
+
+  <!-- Legend -->
+  <text x="60" y="470" font-family="sans-serif" font-size="12" fill="#999">© ADLC - Activity Aggregator Architecture</text>
+</svg>
