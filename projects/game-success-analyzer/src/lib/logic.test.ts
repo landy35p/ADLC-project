@@ -52,7 +52,7 @@ describe("Game Success Logic", () => {
             const result = predictSuccess(mockGames, ["Sci-Fi"], 10);
             expect(result.sampleSize).toBe(0);
             expect(result.successProbability).toBe(0);
-            expect(result.recommendation).toBe("No sufficient data");
+            expect(result.recommendation).toBe("數據不足");
         });
     });
 });

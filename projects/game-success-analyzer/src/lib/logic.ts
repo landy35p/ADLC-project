@@ -62,6 +62,6 @@ export function predictSuccess(games: Game[], selectedTags: string[], priceUSD: 
         sampleSize: N,
         successProbability,
         medianRevenue,
-        recommendation: successProbability > 0.5 ? "High potential" : (N > 0 ? "Risky market" : "No sufficient data"),
+        recommendation: successProbability > 0.5 ? "高潛力市場" : (N > 0 ? "高風險市場" : "數據不足"),
     };
 }

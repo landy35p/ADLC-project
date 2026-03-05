@@ -74,7 +74,7 @@ export default function Home() {
         );
     };
 
-    if (loading) return <div className="p-8 text-center">Loading Data...</div>;
+    if (loading) return <div className="p-8 text-center">正在載入數據...</div>;
 
     return (
         <main className="min-h-screen bg-slate-950 text-slate-50 p-8 font-sans">
@@ -82,21 +82,21 @@ export default function Home() {
                 {/* Header */}
                 <header className="text-center space-y-4">
                     <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
-                        Game Success Analyzer
+                        遊戲成功率分析器
                     </h1>
-                    <p className="text-slate-400 text-lg">Market Trends & AI-Powered Success Prediction</p>
+                    <p className="text-slate-400 text-lg">市場趨勢與 AI 驅動的成功率預測</p>
                 </header>
 
                 {/* Dashboard Section */}
                 <section className="space-y-6">
                     <div className="flex items-center gap-2 text-2xl font-bold">
                         <TrendingUp className="text-cyan-400" />
-                        <h2>Market Trends by Genre</h2>
+                        <h2>各類別市場趨勢</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <Card className="bg-slate-900/50 border-slate-800 col-span-3">
                             <CardHeader>
-                                <CardTitle className="text-slate-200">Genre Success Probability (Top 10)</CardTitle>
+                                <CardTitle className="text-slate-200">各類別遊戲成功機率 (前 10 名)</CardTitle>
                             </CardHeader>
                             <CardContent className="h-[400px]">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -122,14 +122,14 @@ export default function Home() {
                             <Card className="bg-slate-900/50 border-slate-800">
                                 <CardContent className="p-6 flex flex-col items-center justify-center space-y-2">
                                     <Target className="w-8 h-8 text-cyan-400" />
-                                    <span className="text-slate-400 text-sm">Success Threshold</span>
+                                    <span className="text-slate-400 text-sm">成功門檻 (營收)</span>
                                     <span className="text-2xl font-bold">$10,000+</span>
                                 </CardContent>
                             </Card>
                             <Card className="bg-slate-900/50 border-slate-800">
                                 <CardContent className="p-6 flex flex-col items-center justify-center space-y-2">
                                     <DollarSign className="w-8 h-8 text-green-400" />
-                                    <span className="text-slate-400 text-sm">Target Currency</span>
+                                    <span className="text-slate-400 text-sm">目標貨幣</span>
                                     <span className="text-2xl font-bold">USD</span>
                                 </CardContent>
                             </Card>
@@ -141,13 +141,13 @@ export default function Home() {
                 <section className="space-y-6">
                     <div className="flex items-center gap-2 text-2xl font-bold">
                         <BrainCircuit className="text-purple-400" />
-                        <h2>Success Predictor</h2>
+                        <h2>成功率預測器</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <Card className="bg-slate-900/50 border-slate-800 p-6">
                             <form onSubmit={handlePredict} className="space-y-6">
                                 <div className="space-y-3">
-                                    <label className="text-sm text-slate-400">Select Game Genres (Tags)</label>
+                                    <label className="text-sm text-slate-400">選擇遊戲類別 (標籤)</label>
                                     <div className="flex flex-wrap gap-2">
                                         {commonTags.map(tag => (
                                             <button
@@ -165,7 +165,7 @@ export default function Home() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm text-slate-400">Planned Price (USD)</label>
+                                    <label className="text-sm text-slate-400">預定售價 (USD)</label>
                                     <input
                                         type="number"
                                         step="0.01"
@@ -178,7 +178,7 @@ export default function Home() {
                                     disabled={predicting}
                                     className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 p-3 rounded-md font-bold hover:opacity-90 transition-opacity"
                                 >
-                                    {predicting ? "Analyzing Market..." : "Calculate Success Probability"}
+                                    {predicting ? "正在分析市場..." : "計算成功機率"}
                                 </button>
                             </form>
                         </Card>
@@ -190,28 +190,28 @@ export default function Home() {
                                         <div className="text-6xl font-black text-white">
                                             {(prediction.successProbability * 100).toFixed(1)}%
                                         </div>
-                                        <div className="text-sm text-slate-400 uppercase tracking-widest">Probability of Success</div>
+                                        <div className="text-sm text-slate-400 uppercase tracking-widest">預估成功機率</div>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-4 bg-slate-900 border border-slate-800 rounded-lg text-center">
-                                            <div className="text-xs text-slate-500">Market Sample Size</div>
-                                            <div className="text-xl font-bold">{prediction.sampleSize} Games</div>
+                                            <div className="text-xs text-slate-500">市場樣本數</div>
+                                            <div className="text-xl font-bold">{prediction.sampleSize} 款遊戲</div>
                                         </div>
                                         <div className="p-4 bg-slate-900 border border-slate-800 rounded-lg text-center">
-                                            <div className="text-xs text-slate-500">Est. Median Revenue</div>
+                                            <div className="text-xs text-slate-500">預估中位數營收</div>
                                             <div className="text-xl font-bold text-green-400">${prediction.medianRevenue.toLocaleString()}</div>
                                         </div>
                                     </div>
 
                                     <div className={`p-4 rounded-lg border text-center font-semibold ${prediction.successProbability > 0.5 ? "bg-green-500/10 border-green-500/50 text-green-400" : "bg-red-500/10 border-red-500/50 text-red-400"
                                         }`}>
-                                        Recommendation: {prediction.recommendation}
+                                        分析建議：{prediction.recommendation}
                                     </div>
                                 </div>
                             ) : (
                                 <div className="h-full flex items-center justify-center text-slate-500 italic border-2 border-dashed border-slate-800 rounded-lg">
-                                    Enter parameters and run analysis to see prediction
+                                    輸入參數並執行分析以查看預測
                                 </div>
                             )}
                         </div>
