@@ -11,9 +11,10 @@ description: 執行具備交互回饋機制的 ADLC 階層式開發工作流 (Pl
 3. **[交互與回測 (Feedback Loop)]** 根據 Architect 的評估結果：
    - **分支 A (需修改)**：若技術不可行或效能風險太高，請 **[Architect Agent]** 列出具體修改建議。接著切換為 **[Product Agent]**，根據建議修改 `docs/prd.md`。此步驟最多反覆 2 次，若仍無共識請暫停並詢問 User。
    - **分支 B (沒問題)**：若審查通過，進入 Step 4。
-4. **[Architect Agent 定案與拆解]** 雙方達成共識後，**[Architect Agent]** 執行以下兩件事：
+4. **[Architect Agent 定案與拆解]** 雙方達成共識後，**[Architect Agent]** 執行以下任務：
    - 產生 `docs/architecture-design.md`，定義技術選型、Schema 與 API 規格。
    - 分析上述文件，在 `.agents/task_plan.md` 中建立一組「原子化、可被獨立執行」的 Task 列表 (Ticket)，並標示依賴關係。
+   - **[強制規範]** 必須在 task_plan.md 的最後階段，明確加入「更新專案文件 (如 README.md, API docs)」的原子任務。
 
 ### Phase 2: 執行層 (Execution - Atomic Tasks)
 5. **[Dev Agent]** 讀取 `.agents/task_plan.md` 中第一個未完成的 Task。
@@ -31,4 +32,6 @@ description: 執行具備交互回饋機制的 ADLC 階層式開發工作流 (Pl
 
 ### Phase 4: 交付與部署準備 (Delivery)
 10. **[DevOps Agent]** 檢閱本次更新是否需要改動 CI/CD 腳本或 `Dockerfile`，並進行必要的相應調整。
-11. 最後，向 User 總結本次 ADLC 開發週期的成功與否、修復了幾次 Bug，以及完成的產出物。
+11. **[DevOps Agent]** 核對專案文件 (如 `README.md`) 是否與最新的 `docs/prd.md` 功能同步，若有遺漏立即補齊。
+12. **[Git 操作規範]** 執行終端機指令（特別是 `git add` / `git commit`）前，必須嚴格檢查並 `cd` 至正確的目標工作目錄 (CWD)，避免因路徑錯誤導致漏提交。
+13. 最後，向 User 總結本次 ADLC 開發週期的成功與否、修復了幾次 Bug，以及完成的產出物。

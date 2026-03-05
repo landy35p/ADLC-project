@@ -70,11 +70,11 @@ graph TD
 | 角色 (Agent) | 產出物 (Artifacts) | 核心目標 (Key Objective) |
 | :--- | :--- | :--- |
 | **Product** | `docs/prd.md` | 定義「做什麼」與驗收標準 (AC)。 |
-| **Architect** | `docs/architecture-design.md`, `.agents/task_plan.md` | 定義「怎麼做」的結構與技術選型，並**負責將規格拆解為 Dev Agent 可執行的原子化工作單 (Task Decomposition)**。 |
+| **Architect** | `docs/architecture-design.md`, `.agents/task_plan.md` | 定義「怎麼做」的結構與技術選型，並**負責將規格拆解為 Dev Agent 可執行的原子化工作單 (Task Decomposition)**，強制包含文件同步任務。 |
 | **Dev** | 原始碼 / 單元測試 | 嚴格遵循 Task Plan 實作邏輯並確保本地編譯通過。 |
 | **Security** | `docs/security-audit.md` | 進行並行源碼掃描，安全性左移，阻斷含漏洞的代碼。 |
 | **QA** | `docs/qa-report.md` | 並行審查，驗證代碼是否符合 PM 定義的 AC，產出整合測試評估。 |
-| **DevOps** | `Dockerfile` / CI-CD YAML | 自動化建置、測試與打包部署。 |
+| **DevOps** | `Dockerfile` / CI-CD YAML | 自動化建置部署，核對 README 等文件同步狀態，並嚴格把關 Git 操作的當前目錄 (CWD)。 |
 | **SRE** | `docs/rca-report.md` | 監控線上穩定性，主動發現運行異常。 |
 
 ---
