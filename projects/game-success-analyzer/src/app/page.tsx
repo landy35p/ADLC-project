@@ -13,7 +13,9 @@ import {
     Cell,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Target, DollarSign, BrainCircuit } from "lucide-react";
+import { TrendingUp, Target, DollarSign, BrainCircuit, Search } from "lucide-react";
+import { ReconModal } from "@/components/ui/recon-modal";
+import { BlueOceanRecipe } from "@/lib/analyst";
 
 interface StatItem {
     tagName: string;
@@ -37,6 +39,26 @@ export default function Home() {
     // Form state
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [price, setPrice] = useState("19.99");
+
+    const [isReconOpen, setIsReconOpen] = useState(false);
+    const [reconRecipes, setReconRecipes] = useState<BlueOceanRecipe[]>([]);
+    const [reconLoading, setReconLoading] = useState(false);
+
+    const handleRecon = async () => {
+        setIsReconOpen(true);
+        if (reconRecipes.length === 0) {
+            setReconLoading(true);
+            try {
+                const res = await fetch("/api/recon");
+                const data = await res.json();
+                setReconRecipes(data.recipes || []);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setReconLoading(false);
+            }
+        }
+    };
 
     const commonTags = ["Action", "Adventure", "RPG", "Casual", "Strategy", "Indie", "Simulation", "Sports", "Racing", "FPS"];
 
@@ -80,11 +102,19 @@ export default function Home() {
         <main className="min-h-screen bg-slate-950 text-slate-50 p-8 font-sans">
             <div className="max-w-6xl mx-auto space-y-12">
                 {/* Header */}
-                <header className="text-center space-y-4">
+                <header className="text-center space-y-4 relative flex flex-col items-center">
                     <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
                         遊戲成功率分析器
                     </h1>
                     <p className="text-slate-400 text-lg">市場趨勢與 AI 驅動的成功率預測</p>
+
+                    <button
+                        onClick={handleRecon}
+                        className="mt-6 inline-flex items-center gap-2 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-600/40 hover:text-white px-6 py-3 rounded-full font-bold transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.6)]"
+                    >
+                        <Search className="w-5 h-5" />
+                        偵察市場藍海 (專業模式)
+                    </button>
                 </header>
 
                 {/* Dashboard Section */}
@@ -218,6 +248,13 @@ export default function Home() {
                     </div>
                 </section>
             </div>
+
+            <ReconModal
+                isOpen={isReconOpen}
+                onClose={() => setIsReconOpen(false)}
+                recipes={reconRecipes}
+                loading={reconLoading}
+            />
         </main>
     );
 }
