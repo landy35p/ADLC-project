@@ -34,8 +34,12 @@ npm install
 # 生成 Prisma Client
 npx prisma generate
 
-# (選用) 如果 dev.db 為空，從 CSV 匯入種子資料
+# 方法 A：從舊版靜態 CSV 匯入種子資料
 node scripts/seed-sqlite.js
+
+# 方法 B (推薦)：從 Activity Aggregator 匯入動態假資料或 Kaggle 資料
+# 請確保先在 activity-aggregator 目錄執行了 npm start
+npm run seed:aggregator
 ```
 
 ### 3. 啟動開發伺服器
