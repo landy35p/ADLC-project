@@ -1,0 +1,8 @@
+appId,title,releaseDate,priceUSD,estimatedOwners,tags
+10,Counter-Strike,2000-11-01,9.99,150000000,"Action;FPS;Multiplayer"
+20,Team Fortress Classic,1999-04-01,4.99,5000000,"Action;FPS;Multiplayer"
+30,Day of Defeat,2003-05-01,4.99,7000000,"Action;FPS;World War II"
+40,Deathmatch Classic,2001-06-01,4.99,2000000,"Action;FPS;Multiplayer"
+50,Half-Life: Opposing Force,1999-11-01,4.99,5000000,"Action;FPS;Singleplayer"
+570,Dota 2,2013-07-09,0.00,200000000,"Action;MOBA;Free to Play"
+730,Counter-Strike: Global Offensive,2012-08-21,0.00,50000000,"Action;FPS;Multiplayer"

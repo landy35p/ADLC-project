@@ -1,0 +1,21 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Game {
+  id               Int      @id @default(autoincrement())
+  appId            Int      @unique
+  title            String
+  releaseDate      DateTime?
+  priceUSD         Float    @default(0.0)
+  estimatedOwners  Int      @default(0)
+  revenue          Float    @default(0.0)
+  tags             String   // SQLite doesn't support String[], using comma-separated string for now
+}
