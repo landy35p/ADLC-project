@@ -96,8 +96,8 @@ export function calculateBlueOceanScore(games: Game[], tags: string[]): BlueOcea
     });
 
     const N = matchingGames.length;
-    // 樣本數太少缺乏參考價值，但也可能代表極度藍海，這裡我們設一個最低門檻
-    if (N < 2) return null;
+    // MVP 測試階段由於本地資料庫極小，我們將門檻降至 1 (真實環境建議至少 N > 10)
+    if (N < 1) return null;
 
     const S = matchingGames.filter(g => g.revenue >= SUCCESS_THRESHOLD).length;
     const successProb = S / N;
