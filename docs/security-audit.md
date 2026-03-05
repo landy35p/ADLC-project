@@ -1,27 +1,23 @@
-# Security Audit Report (V2 - Blue Ocean Recon)
+# Security Audit Report (Game Success Analyzer - Data Bridge)
 
 ## 審查概覽 (Audit Overview)
-- **審查標的**：Game Success Analyzer V2 新增代碼 (`src/lib/analyst.ts`, `src/app/api/recon/route.ts`, `src/components/ui/recon-modal.tsx`, `src/app/page.tsx`)
+- **審查標的**：`seed-from-aggregator.ts` 以及其依賴變更
 - **審查日期**：2026-03-05
-- **審查結果**：✅ **PASS (無阻斷性安全性問題)**
+- **審查結果**：✅ **PASS**
 
 ## 漏洞分析 (Vulnerability Analysis)
 
-### 1. 輸入驗證與注入攻擊 (Injection Risks)
-- **API 端點 `/api/recon`**：此為 HTTP GET 路由，無需接收使用者輸入參數 (Query/Body)。其內部依賴 `prisma.game.findMany()` 靜態撈取資料，不存在 SQL 注入 (SQLi) 風險。
+### 1. 跨目錄檔案讀取 (Path Traversal Risk)
+- **分析**：`seed-from-aggregator.ts` 使用了寫死的相對路徑 `path.resolve(process.cwd(), "../../projects/activity-aggregator/data/output.json")`。
+- **評估**：安全 (Safe)。由於路徑是 Hardcode 在腳本內，並未暴露任何讓外部使用者輸入的變數，因此沒有 LFI (Local File Inclusion) 或 Directory Traversal 的風險。
+
+### 2. JSON 解析攻擊 (JSON Injection / Prototype Pollution)
+- **分析**：腳本直接對讀取的檔案內容執行 `JSON.parse()`。如果來源檔龐大且惡意，可能導致記憶體耗盡 (DoS) 或是被注入奇怪的 Prototype。
+- **評估**：低風險。`output.json` 的產生者是受我們自己控制的 `Activity Aggregator` 內部服務，且 `sqlite3` 提供原生的 Parameterized Query (`stmt.run(?, ...)`)，可完全避開 SQL Injection 風險。
+
+### 3. 依賴套件與權限
+- **分析**：僅使用內建 `fs`, `path` 以及既有的 `sqlite3`，沒有引入新的不可信賴外部依賴。
 - **評估**：安全 (Safe)。
-
-### 2. 授權與存取控制 (Authentication & Authorization)
-- **狀態**：目前系統設計為無需登入的公開工具 (Public Tool)，未涉及敏感資料 (PII) 或機密商業數據。
-- **評估**：符合預期 (As Expected)。無越權存取問題 (IDOR/BOLA)。
-
-### 3. 跨站腳本攻擊 (XSS - Cross-Site Scripting)
-- **前端渲染**：`ReconModal` 接收後端 API 傳遞的 JSON 格式資料（配方、短評、標籤），並透過 React (Next.js) 的自動編碼 (Auto-escaping) 機制進行渲染。未發現使用 `dangerouslySetInnerHTML` 等不安全實作。
-- **評估**：安全 (Safe)。
-
-### 4. 資源消耗與網路攻擊 (Rate Limiting / DoS)
-- **潛在風險**：`/api/recon` 每呼叫一次會觸發整個資料庫的迴圈運算與交叉比對 (Complexity Calculation & Sorting)。若遭遇惡意大量請求，可能導致 CPU/DB 負載過高 (DoD - Denial of Service)。
-- **建議 (Non-blocker)**：未來若部署至生產環境，建議於 Next.js Middleware 或 API Route 加入 Rate Limiting (如 upstash-ratelimit)，或將運算結果進行 Redis 快取 (Caching)。現階段 MVP 判定為可接受風險。
 
 ## 結論 (Conclusion)
-無 Blocker Bug。代碼合規，允許進入下一階段整合。
+該腳本僅作為本地開發與資料匯入的 CI 工具鏈使用，不對外暴露 HTTP 端點。SQL 寫入動作均經過安全參數化。稽核通過，允許交付。

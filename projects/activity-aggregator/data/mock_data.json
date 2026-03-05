@@ -1,0 +1,35 @@
+[
+    {
+        "title": "Local Mock Game A",
+        "priceUSD": 10.0,
+        "estimatedOwners": 5000,
+        "revenue": 50000,
+        "tags": [
+            "Indie",
+            "Action",
+            "Pixel Graphics"
+        ]
+    },
+    {
+        "title": "Local Mock Game B",
+        "priceUSD": 20.0,
+        "estimatedOwners": 10000,
+        "revenue": 200000,
+        "tags": [
+            "Simulation",
+            "Strategy",
+            "Sandbox"
+        ]
+    },
+    {
+        "title": "Local Mock Game C",
+        "priceUSD": 60.0,
+        "estimatedOwners": 100,
+        "revenue": 6000,
+        "tags": [
+            "MMO",
+            "3D",
+            "Realistic"
+        ]
+    }
+]

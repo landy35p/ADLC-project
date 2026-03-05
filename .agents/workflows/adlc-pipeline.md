@@ -14,7 +14,7 @@ description: 執行具備交互回饋機制的 ADLC 階層式開發工作流 (Pl
 4. **[Architect Agent 定案與拆解]** 雙方達成共識後，**[Architect Agent]** 執行以下任務：
    - 產生 `docs/architecture-design.md`，定義技術選型、Schema 與 API 規格。
    - 分析上述文件，在 `.agents/task_plan.md` 中建立一組「原子化、可被獨立執行」的 Task 列表 (Ticket)，並標示依賴關係。
-   - **[強制規範]** 必須在 task_plan.md 的最後階段，明確加入「更新專案文件 (如 README.md, API docs)」的原子任務。
+   - **[強制規範]** 必須在 task_plan.md 的最後階段，明確加入「運用 `readme` skill 進行專案文件 (README.md, API docs) 生成與更新」的原子任務，確保文件深度符合本地開發啟動與架構說明標準。
 
 ### Phase 2: 執行層 (Execution - Atomic Tasks)
 5. **[Dev Agent]** 讀取 `.agents/task_plan.md` 中第一個未完成的 Task。
@@ -25,7 +25,7 @@ description: 執行具備交互回饋機制的 ADLC 階層式開發工作流 (Pl
 ### Phase 3: 驗證防線 (Validation - Parallel Dispatch)
 8. **並行分派 (Parallel Dispatch)**：請**同時 (在觀念上平行處理)**啟動以下兩項審查任務：
    - 任務 A **[Security Agent]**：掃描方才撰寫的程式碼，重點檢查代碼安全性與合規性，並在 `docs/security-audit.md` 輸出漏洞分析結果。
-   - 任務 B **[QA Agent]**：對照 `docs/prd.md` 檢查新代碼，驗證邏輯是否遺漏，並在 `docs/qa-report.md` 輸出整合測試評估或 Bug 報告。
+   - 任務 B **[QA Agent]**：對照 `docs/prd.md` 檢查新代碼，驗證邏輯是否遺漏，且**必須執行「黑箱測試 (Black-box Testing)」**（建議使用 Playwright 等工具模擬真實使用者行為），並在 `docs/qa-report.md` 輸出整合測試評估或 Bug 報告。若 UI 與預期不符或出現報錯，必須列入 Blocker。
 9. **[結果彙整與退件機制]** 檢視 `security-audit.md` 與 `qa-report.md`。
    - 若有阻斷性問題 (Blocker Bug / Vulnerability)，請將問題彙整成清單，退回 Phase 2 (Step 5)，要求 **[Dev Agent]** 針對清單進行修復。
    - 若皆通過 (Pass)，則進入下一步。
