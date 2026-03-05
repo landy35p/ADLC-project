@@ -2,19 +2,20 @@
 
 這是一個基於 AI 的市場分析與成功率預測工具，旨在協助遊戲開發者評估專案潛力。本專案使用 Next.js、SQLite 與 Vitest 構建。
 
-## 🚀 核心功能
+## 🚀 核心功能 (Features)
 
-- **市場趨勢儀表板**：根據歷史數據，即時視覺化展示各類遊戲標籤的成功機率。
-- **成功率預測器**：互動式工具，可根據遊戲標籤與預定售價，預估達成「成功」（營收 > $10,000 USD）的機率及中位數營收。
+- **[V1] 市場趨勢儀表板**：根據歷史數據，即時視覺化展示各類遊戲標籤的成功機率。
+- **[V1] 成功率預測器**：互動式工具，可根據遊戲標籤與預定售價，預估達成「成功」（營收 > $10,000 USD）的機率及中位數營收。
+- **[V2] 專業市場藍海偵察 (Blue Ocean Recon)**：專為獨立開發者打造的策略生成器。透過獨創的「資源成本三維係數 (Complexity Triple-Index)」評估美術、開發與維運難度，自動推薦目前市場上高回報、低成本的黃金開發配方。
 - **測試驅動開發 (TDD)**：核心業務邏輯由單元測試完整覆蓋，確保運算邏輯的準確性。
-- **現代化介面**：採用 Slate 深色風格，搭配 Tailwind CSS 與 Recharts 打造專業且具現代感的 UI。
+- **現代化介面**：採用 Slate 深色風格，搭配 Tailwind CSS、Recharts 與 Framer Motion 打造專業且具現代感的 UI。
 
 ## 🛠 技術棧
 
 - **框架**: [Next.js 15+](https://nextjs.org/) (App Router)
 - **資料庫**: [SQLite](https://www.sqlite.org/) 透過 [Prisma](https://www.prisma.io/)（針對 Windows 環境穩定性提供 direct `sqlite3` 回退方案）
 - **測試**: [Vitest](https://vitest.dev/)
-- **圖表**: [Recharts](https://recharts.org/) & [Lucide React](https://lucide.dev/)
+- **圖表與動畫**: [Recharts](https://recharts.org/) & [Framer Motion](https://motion.dev/) & [Lucide React](https://lucide.dev/)
 - **樣式**: Tailwind CSS
 
 ## 🏁 快速開始
