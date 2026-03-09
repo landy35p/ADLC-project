@@ -1,98 +1,100 @@
 # ADLC (Agentic Development Lifecycle) 概覽
 
-本文件說明專案中各個 AI Agent 之間的職責分配、交接規則以及自動化回饋循環邏輯。本專案採用**階層式多代理人架構 (Hierarchical Multi-Agent Architecture)**，透過實體檔案進行上下文隔離與任務交接。
+本文件說明專案中各個 AI Agent 之間的職責分配、交接規則以及自動化回饋循環邏輯。本專案採用 **GitHub Copilot Custom Agent Modes**，透過 `.github/agents/` 中的 Agent 指令檔定義各角色行為。
+
+> 📋 **維護規範**：本文件與 `.github/agents/adlc.agent.md` 必須保持同步。修改任一方時須同步更新另一方。
 
 ## 1. 代理人關係圖 (Orchestration Map)
 
 這張圖展示了 Agent 在開發生命週期中的縱向流轉、核心交付物以及回饋機制。
 
 ```mermaid
-graph TD
-    User((User Vision)) ==> PM
+flowchart TD
+    User(["使用者"])
 
-    subgraph Planning [Phase 1: 策略與規劃層]
-        PM[Product Agent] -- "Draft PRD" --> Arch[Architect Agent]
-        Arch -. "技術審查與回饋<br>(Debate Protocol)" .-> PM
-        Arch -- "架構設計 & Task拆解" --> TaskPlan[(task_plan.md)]
+    subgraph Ph1["Phase 1 規劃"]
+        ADLC[ADLC Orchestrator]
     end
 
-    subgraph Execution [Phase 2: 執行層]
-        TaskPlan --> Dev[Dev Agent]
-        Dev -- "本地編譯驗證" --> Dev
+    subgraph Ph2["Phase 2 開發"]
+        Dev[Dev Agent]
     end
 
-    subgraph Validation [Phase 3: 驗證防線]
-        Dev -- "程式碼提交" --> Dispatch{Parallel Dispatch}
-        Dispatch --> Sec[Security Agent]
-        Dispatch --> QA[QA Agent]
-        Sec -- "安全審核" --> Synthesis[結果彙整]
-        QA -- "品質驗收" --> Synthesis
+    subgraph Ph3["Phase 3 並行驗證"]
+        Sec[Security Agent]
+        QA[QA Agent]
     end
 
-    subgraph Delivery [Phase 4: 交付與部署]
-        Synthesis -- "All Pass" --> DevOps[DevOps Agent]
-        DevOps -- "自動化部署" --> SRE[SRE Agent]
+    subgraph Ph4["Phase 4 部署"]
+        DevOps[DevOps Agent]
     end
 
-    %% 內部快速回饋循環 (Inner Loops)
-    Synthesis -. "Blocker (Bug/Vulnerability)" .-> Execution
+    User -->|"描述需求"| ADLC
+    ADLC -->|"委派實作任務"| Dev
+    Dev -->|"源碼安全審查"| Sec
+    Dev -->|"品質整合驗收"| QA
+    Sec -->|"安全通過"| DevOps
+    QA -->|"品質通過"| DevOps
+    DevOps --> Done(["完成"])
 
-    %% 外部長期閉環 (Outer Loops)
-    SRE -. "生產環境反饋" .-> Dev
-    SRE -. "需求演進/變更" .-> PM
+    Sec -.->|"發現漏洞，退回"| Dev
+    QA -.->|"測試失敗，退回"| Dev
+    Done -.->|"新需求或問題回報"| ADLC
 
-    %% 樣式美化 (High Contrast for Light/Dark Modes)
-    classDef primary fill:#bbdefb,stroke:#0d47a1,stroke-width:2px,color:#000;
-    classDef secondary fill:#e1bee7,stroke:#4a148c,stroke-width:2px,color:#000;
-    classDef success fill:#c8e6c9,stroke:#1b5e20,stroke-width:2px,color:#000;
-    classDef warning fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000;
-    classDef danger fill:#ffccbc,stroke:#bf360c,stroke-width:2px,color:#000;
-    classDef neutral fill:#f5f5f5,stroke:#9e9e9e,stroke-width:2px,color:#000;
+    classDef phase1 fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    classDef phase2 fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef phase3 fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef phase4 fill:#ffe4e6,stroke:#dc2626,color:#7f1d1d
+    classDef term   fill:#f8fafc,stroke:#64748b,color:#0f172a
 
-    class PM primary;
-    class Arch secondary;
-    class Dev success;
-    class Sec,QA warning;
-    class DevOps,SRE danger;
-    class Dispatch,Synthesis,TaskPlan neutral;
+    class ADLC phase1
+    class Dev phase2
+    class Sec,QA phase3
+    class DevOps phase4
+    class User,Done term
 ```
 
 > [!TIP]
 > **如何閱讀此圖**：
 > - **實線箭頭**：核心交付流程（從需求到部署）。
-> - **紅色虛線**：內部快速回饋循環（發生規劃衝突、Bug 或安全漏洞時自動退回）。
-> - **藍色虛線**：外部長期閉環（根據生產環境數據優化或需求變更回饋到產品端）。
+> - **虛線箭頭**：回饋循環（發現問題退回修復，或外部新需求重新觸發流程）。
 
 ---
 
 ## 2. 角色職責說明 (Agent Roles)
 
-| 角色 (Agent) | 產出物 (Artifacts) | 核心目標 (Key Objective) |
-| :--- | :--- | :--- |
-| **Product** | `docs/prd.md` | 定義「做什麼」與驗收標準 (AC)。 |
-| **Architect** | `docs/architecture-design.md`, `.agents/task_plan.md` | 定義「怎麼做」的結構與技術選型，並**負責將規格拆解為 Dev Agent 可執行的原子化工作單 (Task Decomposition)**，強制包含文件同步任務。 |
-| **Dev** | 原始碼 / 單元測試 | 嚴格遵循 Task Plan 實作邏輯並確保本地編譯通過。 |
-| **Security** | `docs/security-audit.md` | 進行並行源碼掃描，安全性左移，阻斷含漏洞的代碼。 |
-| **QA** | `docs/qa-report.md` | 並行審查，驗證代碼是否符合 PM 定義的 AC，產出整合測試評估。 |
-| **DevOps** | `Dockerfile` / CI-CD YAML | 自動化建置部署，核對 README 等文件同步狀態，並嚴格把關 Git 操作的當前目錄 (CWD)。 |
-| **SRE** | `docs/rca-report.md` | 監控線上穩定性，主動發現運行異常。 |
+| 角色 (Agent) | 工具模式 | 產出物 (Artifacts) | 核心目標 (Key Objective) |
+| :--- | :--- | :--- | :--- |
+| **ADLC Orchestrator** | `@adlc` | 任務分解計畫、協調結果摘要 | 銜接用戶需求與四個技術 Agent，主導整個開發生命週期流程。 |
+| **Dev** | `@dev` | 原始碼 / 單元測試 | 嚴格遵循任務規格實作邏輯，確保本地編譯與測試通過。 |
+| **Security** | `@security` | `docs/security-audit.md` | 進行源碼安全掃描（OWASP Top 10），阻斷含漏洞的代碼進入部署。 |
+| **QA** | `@qa` | `docs/qa-report.md` | 並行審查，驗證代碼符合驗收標準，產出整合測試與 E2E 評估。 |
+| **DevOps** | `@devops` | `Dockerfile` / CI/CD YAML | 自動化建置部署，維護 CI/CD 流水線，嚴格把關 Git 操作。 |
 
 ---
 
 ## 3. 核心循環邏輯 (Feedback Loops)
 
-本專案將協作劃分為三種維度的回饋迴圈：
+本專案將協作劃分為兩種維度的回饋迴圈：
 
-### 1. 協商循環 (Debate Protocol) - *發生在 Planning 階段*
-**Product Agent** 與 **Architect Agent** 之間並非單向指示。當 PM 提出 PRD 初稿後，架構師會評估技術可行性。若架構師認為有風險或效能疑慮，流程會退回給 PM 修改 `prd.md`，直到雙方達成共識才進入開發。
+### 1. 內部循環 (The Inner Loop) - *發生在 Validation 階段*
 
-### 2. 內部循環 (The Inner Loop) - *發生在 Validation 階段*
-透過**並行分派 (Parallel Dispatch)** 同時啟動 **Security** 與 **QA**。一旦發現問題，審查結果會彙整統一退回給 **Dev** 進行修復。這是為了確保沒有瑕疵的程式碼進入部署階段。
+透過**並行分派 (Parallel Dispatch)** 同時啟動 **Security** 與 **QA**。一旦發現問題，審查結果會彙整後統一退回給 **Dev** 進行修復。此循環持續進行，直到 Security 與 QA 同時核准，才允許進入 Phase 4 部署流程。
 
-### 3. 外部循環 (The Outer Loop) - *發生在營運維護階段*
-當 **SRE** 在生產環境偵測到異常，或 **User** 提出新需求時，流程會退回至 **Dev** (修正) 或 **Product** (重新定義)，形成持續進化的閉環。
+### 2. 外部循環 (The Outer Loop) - *由用戶觸發*
+
+當用戶提出新需求或回報問題時，重新呼叫 `@adlc`，即可觸發新一輪的四階段流程。ADLC Orchestrator 負責分析需求差異，決定從哪個 Phase 重新介入。
 
 ---
 
 ## 4. 如何啟動？
-請在 Antigravity 視窗中呼叫 `/adlc-pipeline` 或 `/pm-orchestrator`，引導您完成整個階層式開發生命週期的管理。
+
+在 VS Code Copilot Chat 視窗中，切換至對應的 **Agent Mode** 即可啟動：
+
+- **`@adlc`** — 啟動完整的四階段 ADLC 流程（**推薦入口點**）
+- **`@dev`** — 直接委派開發工程師執行實作任務
+- **`@qa`** — 直接啟動測試工程師進行品質驗收
+- **`@security`** — 直接啟動安全官進行源碼安全審查
+- **`@devops`** — 直接啟動維運工程師更新 CI/CD 流水線
+
+> 💡 **建議工作流程**：以 `@adlc` 描述您的功能需求，由 Orchestrator 自動委派後續工作給各專責 Agent。
